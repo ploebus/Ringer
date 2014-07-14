@@ -71,15 +71,20 @@ path:hover {
     
 	
 	 d3.json("oakland.json", function(err, collection) {
-      console.log(err);
-      console.log(collection);
+      
       var transform = d3.geo.transform({point: projectPoint}),
       path = d3.geo.path().projection(transform);
 
 	  var feature = g.selectAll("path")
       .data(collection.features)
-      .enter().append("path");
-
+      .enter().append("path")
+      .attr('class','tract');
+	
+	$('.tract').click(function(x){
+		console.log(x)
+		var theData = x.currentTarget;
+		console.log(d);
+		});
   map.on("viewreset", reset);
   reset();
 function reset() {
