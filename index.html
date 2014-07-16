@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
     <link rel="stylesheet" href="style.css" />
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-<style>
+	
+	<style>
 
 
 svg {
@@ -37,6 +38,15 @@ path:hover {
   fill-opacity: .7;
 }
 
+.tractAlot{
+	fill:brown;
+	fill-opacity:.8;
+}
+
+.tractAlittle{
+	fill:grey;
+	fill-opacity:.4	
+}
 </style>
   </head>
   <body>
@@ -63,7 +73,15 @@ path:hover {
 		zoom: 12
 	});
 	
+	
 	map.addLayer(layer);
+	
+	function getSymbology(d){
+		if (d > 200)
+			return 'tractAlot';
+		else
+			return 'tractAlittle';
+	}
 	//ADD SVG PANE
 	var svg = d3.select(map.getPanes().overlayPane).append("svg"),
     g = svg.append("g").attr("class", "leaflet-zoom-hide");
@@ -74,11 +92,19 @@ path:hover {
       
       var transform = d3.geo.transform({point: projectPoint}),
       path = d3.geo.path().projection(transform);
-
+	 
+	
+	 	
 	  var feature = g.selectAll("path")
       .data(collection.features)
       .enter().append("path")
-      .attr('class','tract');
+      .attr('class',function(d){
+		  if(d.properties.CW_child>300)
+			return "tractAlot"
+		  else
+			return "tractAlittle"
+		  })
+		  .on("click", showData);
 	
 	$('.tract').click(function(x){
 		console.log(x)
@@ -108,6 +134,10 @@ function reset() {
     this.stream.point(point.x, point.y);
   }
 });
+function showData(e){
+	;
+}
+
 </script>
   </body>
 </html>
