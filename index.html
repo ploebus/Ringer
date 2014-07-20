@@ -38,6 +38,11 @@ path:hover {
   fill-opacity: .7;
 }
 
+.selected {
+	fill:brown;
+	stroke-width:3px
+}
+
 .tractAlot{
 	fill:brown;
 	fill-opacity:.8;
@@ -74,68 +79,58 @@ path:hover {
 	});
 	
 	
-	map.addLayer(layer);
+	//map.addLayer(layer);
 	
-	function getSymbology(d){
-		if (d > 200)
-			return 'tractAlot';
-		else
-			return 'tractAlittle';
-	}
-	//ADD SVG PANE
-	var svg = d3.select(map.getPanes().overlayPane).append("svg"),
-    g = svg.append("g").attr("class", "leaflet-zoom-hide");
-    
-    
-	
-	 d3.json("oakland.json", function(err, collection) {
-      
-      var transform = d3.geo.transform({point: projectPoint}),
-      path = d3.geo.path().projection(transform);
-	 
-	
-	 	
-	  var feature = g.selectAll("path")
-      .data(collection.features)
-      .enter().append("path")
-      .attr('class',function(d){
-		  if(d.properties.CW_child>300)
-			return "tractAlot"
-		  else
-			return "tractAlittle"
-		  })
-		  .on("click", showData);
-	
-	$('.tract').click(function(x){
-		console.log(x)
-		var theData = x.currentTarget;
-		console.log(d);
-		});
-  map.on("viewreset", reset);
-  reset();
-function reset() {
-    var bounds = path.bounds(collection),
-        topLeft = bounds[0],
-        bottomRight = bounds[1];
+          
+	map._initPathRoot() ;
 
-    svg .attr("width", bottomRight[0] - topLeft[0])
-        .attr("height", bottomRight[1] - topLeft[1])
-        .style("left", topLeft[0] + "px")
-        .style("top", topLeft[1] + "px");
+    //Create svg element to overlay pane
+	//var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+	var svg = d3.select("#map").select('svg');
+	//create the svg groups
+	var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+	var g1 = svg.append("g").attr("class", "leaflet-zoom-hide");
+	var g2 = svg.append("g").attr("class", "leaflet-zoom-hide");
+	var g3 = svg.append("g").attr("class", "leaflet-zoom-hide");
+	var g4 = svg.append("g").attr("class", "leaflet-zoom-hide");
+	var g5 = svg.append("g").attr("class", "leaflet-zoom-hide");
+	var g6 = svg.append("g").attr("class", "leaflet-zoom-hide");
+	
+	//this helpers projects points
+	
+	var path = d3.geo.path().projection(function project(x) {
+    var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+    return [point.x, point.y];
+	});
+	loadLayer("oakland.json",g);
+	loadLayer("Ring1.geojson",g1);
+	loadLayer("R2temp.geojson",g2);
+	loadLayer("R3temp.geojson",g3);
+	loadLayer("R4temp.geojson",g4);	
+	loadLayer("R5temp.geojson",g5);	
+	loadLayer("R6temp.geojson",g6);	
 
-    g .attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-    feature.attr("d", path);
+function highlightTract(t){
+	console.log(t.properties.Censustrac);
+	$(".selected").removeClass('selected');
+	$('path.tract'+t.properties.Censustrac).attr('class','tract'+t.properties.Censustrac + ' selected');
 }
-
- // Use Leaflet to implement a D3 geometric transformation.
-  function projectPoint(x, y) {
-    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
-    this.stream.point(point.x, point.y);
-  }
-});
-function showData(e){
-	;
+function loadLayer(data,group){
+	d3.json(data, function(collection) {
+		var feature = group.selectAll("path")
+			.data(collection.features)
+			.enter().append("path")
+			.attr('class',function(d){
+				var re = ".";
+				s = String(d.properties.Censustrac);
+				console.log(s.replace(re,""));
+				return "tract" + s.replace(re,"");})
+			.on('click',highlightTract);
+		
+		map.on("viewreset", function reset() {
+		feature.attr("d",path)
+		});
+})
 }
 
 </script>
